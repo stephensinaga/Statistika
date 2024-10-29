@@ -139,11 +139,9 @@
           <h1 class="card-title text-center mb-4 text-primary">
             Pembelajaran Statistika
           </h1>
-
+  
           <div class="mb-3">
-            <label for="dataInput" class="form-label"
-              >Masukkan Data (pisahkan dengan koma):</label
-            >
+            <label for="dataInput" class="form-label">Masukkan Data (pisahkan dengan koma):</label>
             <input
               type="text"
               id="dataInput"
@@ -151,11 +149,9 @@
               placeholder="Contoh: 10,20,30,40,50"
             />
           </div>
-
+  
           <div class="mb-3">
-            <label for="intervalInput" class="form-label"
-              >Masukkan Lebar Interval:</label
-            >
+            <label for="intervalInput" class="form-label">Masukkan Lebar Interval:</label>
             <input
               type="number"
               id="intervalInput"
@@ -164,89 +160,97 @@
               min="1"
             />
           </div>
-
+  
           <div class="d-grid gap-2">
-            <button onclick="processData()" class="btn btn-primary">
-              Proses Data
-            </button>
+            <button onclick="processData()" class="btn btn-primary">Proses Data</button>
           </div>
-
+  
           <div class="results mt-4">
             <h3>Hasil:</h3>
             <p id="mean" class="text-muted">Mean: -</p>
+            <p id="median" class="text-muted">Median: -</p>
             <p id="mode" class="text-muted">Modus: -</p>
-            <p id="average" class="text-muted">Rata-rata: -</p>
             <div id="groupedData" class="text-muted"></div>
           </div>
         </div>
       </div>
     </div>
-
+  
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-            function processData() {
-            const input = document.getElementById("dataInput").value;
-            const intervalWidth = parseInt(
-            document.getElementById("intervalInput").value
-            );
-        
-            // Mengubah input menjadi array angka
-            const data = input
-            .split(",")
-            .map((num) => parseFloat(num.trim()))
-            .filter((num) => !isNaN(num));
-        
-            // Menghitung Mean/Rata-rata
-            const mean = data.reduce((sum, value) => sum + value, 0) / data.length;
-        
-            // Menghitung Modus
-            const frequency = {};
-            let maxFreq = 0;
-            let mode = [];
-        
-            data.forEach((num) => {
-            frequency[num] = (frequency[num] || 0) + 1;
-            if (frequency[num] > maxFreq) {
-                maxFreq = frequency[num];
-                mode = [num];
-            } else if (frequency[num] === maxFreq) {
-                mode.push(num);
-            }
-            });
-        
-            mode = [...new Set(mode)].join(", ");
-        
-            // Mengelompokkan data ke dalam interval kelas
-            const minData = Math.min(...data);
-            const maxData = Math.max(...data);
-            const groupedData = {};
-        
-            for (let i = minData; i <= maxData; i += intervalWidth) {
-            const range = `${i}-${i + intervalWidth - 1}`;
-            groupedData[range] = 0;
-        
-            data.forEach((num) => {
-                if (num >= i && num < i + intervalWidth) {
-                groupedData[range]++;
-                }
-            });
-            }
-        
-            // Update hasil ke HTML
-            document.getElementById("mean").textContent = `Mean: ${mean.toFixed(2)}`;
-            document.getElementById("mode").textContent = `Modus: ${mode}`;
-            document.getElementById("average").textContent = `Rata-rata: ${mean.toFixed(
-            2
-            )}`;
-        
-            // Menampilkan data kelompok
-            const groupedDataContainer = document.getElementById("groupedData");
-            groupedDataContainer.innerHTML = "<h4>Data Kelompok:</h4>";
-            for (const [range, freq] of Object.entries(groupedData)) {
-            groupedDataContainer.innerHTML += `<p>${range}: ${freq}</p>`;
-            }
+      function processData() {
+        const input = document.getElementById("dataInput").value;
+        const intervalWidth = parseInt(document.getElementById("intervalInput").value);
+  
+        // Mengubah input menjadi array angka
+        const data = input
+          .split(",")
+          .map((num) => parseFloat(num.trim()))
+          .filter((num) => !isNaN(num));
+  
+        if (data.length === 0) {
+          alert("Masukkan data yang valid.");
+          return;
         }
+  
+        // Menghitung Mean
+        const mean = data.reduce((sum, value) => sum + value, 0) / data.length;
+  
+        // Menghitung Median
+        data.sort((a, b) => a - b);
+        let median;
+        const middle = Math.floor(data.length / 2);
+        if (data.length % 2 === 0) {
+          median = (data[middle - 1] + data[middle]) / 2;
+        } else {
+          median = data[middle];
+        }
+  
+        // Menghitung Modus
+        const frequency = {};
+        let maxFreq = 0;
+        let mode = [];
+        data.forEach((num) => {
+          frequency[num] = (frequency[num] || 0) + 1;
+          if (frequency[num] > maxFreq) {
+            maxFreq = frequency[num];
+            mode = [num];
+          } else if (frequency[num] === maxFreq) {
+            mode.push(num);
+          }
+        });
+        mode = [...new Set(mode)].join(", ");
+  
+        // Mengelompokkan data ke dalam interval kelas
+        const minData = Math.min(...data);
+        const maxData = Math.max(...data);
+        const groupedData = {};
+  
+        for (let i = minData; i <= maxData; i += intervalWidth) {
+          const range = `${i}-${i + intervalWidth - 1}`;
+          groupedData[range] = 0;
+  
+          data.forEach((num) => {
+            if (num >= i && num < i + intervalWidth) {
+              groupedData[range]++;
+            }
+          });
+        }
+  
+        // Update hasil ke HTML
+        document.getElementById("mean").textContent = `Mean: ${mean.toFixed(2)}`;
+        document.getElementById("median").textContent = `Median: ${median.toFixed(2)}`;
+        document.getElementById("mode").textContent = `Modus: ${mode}`;
+  
+        // Menampilkan data kelompok
+        const groupedDataContainer = document.getElementById("groupedData");
+        groupedDataContainer.innerHTML = "<h4>Data Kelompok:</h4>";
+        for (const [range, freq] of Object.entries(groupedData)) {
+          groupedDataContainer.innerHTML += `<p>${range}: ${freq}</p>`;
+        }
+      }
     </script>
   </body>
+  
 </html>
